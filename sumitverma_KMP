@@ -1,0 +1,100 @@
+#include <iostream>
+#include <cstring>
+#include<iostream>
+#include<fstream>
+#include <sstream>
+using namespace std;
+void KMPo(string pattern, int f[])
+{
+    int p = pattern.length(), a;
+    f[0] = -1;
+    for (int i = 1; i < p; i++)
+    {
+        a = f[i - 1];
+        while (a >= 0)
+        {
+            if (pattern[a] == pattern[i - 1])
+                break;
+            else
+                a = f[a];
+        }
+        f[i] = a + 1;
+    }
+}
+ 
+int KMPi(int i,string pattern, string target)
+{
+    int p = pattern.length();
+    int q = target.length();
+    int f[p];     
+    KMPo(pattern, f);     
+    
+    int a = 0;        
+    while (i < q)
+    {
+        if (a == -1)
+        {
+            i++;
+            a = 0;
+        }
+        else if (target[i] == pattern[a])
+        {
+            i++;
+            a++;
+            if (a == p)
+                return i-a+1;
+        }
+        else
+            a = f[a];
+    }
+    return -2;
+}
+void word(int p,int count){
+	ifstream file("Default.txt"); // here enter the name of your text file
+	string myArray[1000];
+    if(file.is_open())
+    {
+        for(int i = 0; i < 1000; i++)
+        {
+            file >> myArray[i];
+        }
+    }
+    cout<<myArray[count]<<endl;
+} 
+int main()
+{
+	ifstream file("Default.txt");
+	int i=0;
+    stringstream buffer;
+    buffer << file.rdbuf();
+    string str = buffer.str();
+    cout << str<<endl;
+    string pat;
+    int p=0;
+    int para=1;
+    for(int a=0;a<str.length();a++){
+    	if(str[a]=='\n' && str[a+1]=='\n'){
+    		para++;
+		}
+	}
+	cout<<""<<endl;
+	cout<<"the no. of paragraphs is "<<para<<endl;
+	cout<<""<<endl;
+    cout<<"Enter substring"<<endl;
+    cin>>pat;
+    while(i<str.length() && i>=0){
+	    int p=KMPi(i,pat,str);
+	    int count=0;
+	    p++;
+	    i=p;
+	    if(i!=-1){
+	    	for (int j= 0; j <i; j++){
+	            if (str[j] == ' ' ||(str[j]=='\n' && str[j+1]=='\n')){
+	                	count++;
+	            }
+			}
+			cout<<"substring starts from "<<i-1<<endl;" and word is ";
+			word(i,count);
+		}  
+	}
+}
