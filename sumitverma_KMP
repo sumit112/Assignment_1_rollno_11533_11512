@@ -1,100 +1,142 @@
-#include <iostream>
-#include <cstring>
-#include<iostream>
-#include<fstream>
-#include <sstream>
-using namespace std;
-void KMPo(string pattern, int f[])
-{
-    int p = pattern.length(), a;
-    f[0] = -1;
-    for (int i = 1; i < p; i++)
-    {
-        a = f[i - 1];
-        while (a >= 0)
-        {
-            if (pattern[a] == pattern[i - 1])
-                break;
-            else
-                a = f[a];
-        }
-        f[i] = a + 1;
-    }
+#include<stdio.h>
+#include<string.h>
+
+
+#include<stdlib.h>
+
+void start();
+char* read_file(char name[256]){
+	FILE *file;
+	char *buffer;
+	char ch;
+	int fsize;
+	file = fopen(name,"r");
+	if (!file){
+		printf("\nFile not found!\n");
+		printf("Program terminated.");
+		//return 1;
+	}
+	fseek(file,0,SEEK_END);
+	fsize=ftell(file);
+	fseek(file,0,SEEK_SET);
+	buffer = (char*)malloc(sizeof(char)*(fsize+1));
+	if(buffer==NULL){
+	   printf("\nMemory error.\n");
+	   printf("Program terminated.");
+	   //return 1;
+	}
+	size_t newbuffer = fread(buffer, sizeof(char), fsize, file);
+	buffer[++newbuffer] = '\0';
+	fclose(file);
+    return buffer;
 }
- 
-int KMPi(int i,string pattern, string target)
-{
-    int p = pattern.length();
-    int q = target.length();
-    int f[p];     
-    KMPo(pattern, f);     
-    
-    int a = 0;        
-    while (i < q)
-    {
-        if (a == -1)
-        {
-            i++;
-            a = 0;
-        }
-        else if (target[i] == pattern[a])
-        {
-            i++;
-            a++;
-            if (a == p)
-                return i-a+1;
-        }
-        else
-            a = f[a];
-    }
-    return -2;
+int count_words(char *buffer){
+	int c=0;
+	while(*buffer!='\0'){
+		if(*buffer==' ')
+			c++;		
+		buffer++;
+	}
+	c++;
+	return c;
 }
-void word(int p,int count){
-	ifstream file("Default.txt"); // here enter the name of your text file
-	string myArray[1000];
-    if(file.is_open())
-    {
-        for(int i = 0; i < 1000; i++)
-        {
-            file >> myArray[i];
-        }
-    }
-    cout<<myArray[count]<<endl;
-} 
-int main()
-{
-	ifstream file("Default.txt");
-	int i=0;
-    stringstream buffer;
-    buffer << file.rdbuf();
-    string str = buffer.str();
-    cout << str<<endl;
-    string pat;
-    int p=0;
-    int para=1;
-    for(int a=0;a<str.length();a++){
-    	if(str[a]=='\n' && str[a+1]=='\n'){
-    		para++;
+int count_para(char *buffer){
+	int c=0;
+	while(*buffer!='\0'){
+		if(*buffer=='\n')
+			c++;
+		buffer++;
+	}
+	return c;
+}
+int count_chara(char *buffer){
+	int c=0;
+	while(*buffer!='\0'){
+		c++;
+		buffer++;
+	}
+	return c;
+}
+int length(char str[256]){
+	int i=0;int c=0;
+	while(str[i]!='\0'){
+		i++;
+		c++;
+	}
+	return c;
+}
+/*int * pattern(char word[256]){
+	int l=length(word);
+	int m[l-1];int i=0;int j;
+	m[0]=0;
+	j=1;
+	while(j<l){
+		if((i>0)&&(word[i]!=word[j]))
+			i=m[i];
+		if(word[i]==word[j])
+			i++;
+		m[j]=i;
+		j++;
+	}
+	return m;
+}*/
+void search_str(char *buffer){
+	char word[256];int i=0;int j=1;
+	printf("\n\nSearch: ");
+	scanf("%s",word);
+	//int lm = length(word);
+	//printf("%d\n",lm);
+	//m=pattern(word);
+	int l=length(word);
+	int m[l-1];
+	m[0]=0;
+	while(j<l){
+		if((i>0)&&(word[i]!=word[j]))
+			i=m[i-1];
+		if(word[i]==word[j])
+			i++;
+		m[j]=i;
+		j++;
+	}
+	i=0;j=1;
+	while(*buffer!='\0'){
+		if((i>0)&&(word[i]!=*buffer)){
+			i=m[i];
+			//printf("\nDAMN %d",i);
 		}
+		if(word[i]==*buffer)
+			i++;
+		if(i==l){
+			printf("\nString found at index: %d\n",(j-l+1));
+			i=m[i-1];
+			//printf("\nYOLO %d",i);
+		}
+		//printf("\nNOPE %d",j);
+		buffer++;
+		j++;
 	}
-	cout<<""<<endl;
-	cout<<"the no. of paragraphs is "<<para<<endl;
-	cout<<""<<endl;
-    cout<<"Enter substring"<<endl;
-    cin>>pat;
-    while(i<str.length() && i>=0){
-	    int p=KMPi(i,pat,str);
-	    int count=0;
-	    p++;
-	    i=p;
-	    if(i!=-1){
-	    	for (int j= 0; j <i; j++){
-	            if (str[j] == ' ' ||(str[j]=='\n' && str[j+1]=='\n')){
-	                	count++;
-	            }
-			}
-			cout<<"substring starts from "<<i-1<<endl;" and word is ";
-			word(i,count);
-		}  
-	}
+}
+
+int main(){
+	start();
+    return 0;
+}
+void start(){
+	char name[256],word[256];
+	char *text;
+	int c=0;
+	printf("NLP Assignment 1\n\n");
+	printf("KMP Algorithm implementation\n");
+	printf("Author: Verma and Daanish\n\n\n");
+	printf("Enter name of the text file(.txt): ");
+	scanf("%s", name);
+	text=read_file(name);
+	int words = count_words(text);
+	int para = count_para(text);
+	int chara = count_chara(text);
+	printf("\nParagraphs in the document: %d\n",para);
+	printf("Words in the document: %d\n",words);
+	printf("Characters in the document: %d\n",chara);
+	search_str(text);
+	
 }
